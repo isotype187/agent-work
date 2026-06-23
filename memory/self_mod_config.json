@@ -3,7 +3,7 @@
   "kernel_weight": 1.0,
   "realtime_weight": 1.0,
   "audit_weight": 1.0,
-  "retry_limit": 10,
+  "retry_limit": 11,
   "strict_mode": true,
-  "last_update": 1782237325.0173779
+  "last_update": 1782237327.7605572
 }
