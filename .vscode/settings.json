@@ -1,0 +1,12 @@
+{"terminal.integrated.profiles.windows": {
+    "myPythonEnv": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "args": [
+            "-NoExit",
+            "-Command",
+            ".\\venv\\Scripts\\Activate.ps1; python agent/auto_commit.py"
+        ]
+    }
+},
+"terminal.integrated.defaultProfile.windows": "myPythonEnv"
+}

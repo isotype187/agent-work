@@ -1,19 +1,25 @@
-# agent/auto_commit.py
-
+import os
+import sys
 import time
 import subprocess
 from threading import Timer
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+# Ensure project root is in path FIRST (critical fix)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from agent.system_integrity import run_system_check
+from agent.kernel_guard import run_kernel_check
+from agent.realtime_guard import run_realtime_check
+from agent.ast_kernel_guard import run_ast_kernel_check
 
 DEBOUNCE_SECONDS = 2.5
 timer = None
 
 
 # -----------------------------
-# GET GIT DIFF now
+# GET GIT DIFF
 # -----------------------------
 
 def get_git_diff():
@@ -24,7 +30,6 @@ def get_git_diff():
             text=True
         )
 
-        # fallback if nothing staged yet
         if not result.stdout.strip():
             result = subprocess.run(
                 ["git", "diff"],
@@ -34,7 +39,7 @@ def get_git_diff():
 
         return result.stdout
 
-    except Exception as e:
+    except Exception:
         return ""
 
 
@@ -47,9 +52,6 @@ def generate_commit_message(diff: str):
 
     tags = []
 
-    # -----------------------------
-    # SYSTEM AREA DETECTION
-    # -----------------------------
     if "router.py" in diff_lower:
         tags.append("router")
 
@@ -65,9 +67,6 @@ def generate_commit_message(diff: str):
     if "main.py" in diff_lower:
         tags.append("core")
 
-    # -----------------------------
-    # CHANGE TYPE DETECTION
-    # -----------------------------
     if "def " in diff_lower:
         change_type = "refactor"
     elif "+" in diff and "-" in diff:
@@ -79,9 +78,6 @@ def generate_commit_message(diff: str):
     else:
         change_type = "update"
 
-    # -----------------------------
-    # FINAL MESSAGE BUILD
-    # -----------------------------
     tag_str = ", ".join(tags) if tags else "system"
 
     return f"{change_type}: update {tag_str}"
@@ -111,11 +107,21 @@ def git_commit(message):
 # -----------------------------
 
 def safe_commit():
+    # system integrity gate
     report = run_system_check()
 
     if report["issues"]:
         print("🚫 Commit blocked (system integrity issues):")
         for i in report["issues"]:
+            print(" -", i)
+        return
+
+    # kernel architecture gate
+    kernel_report = run_kernel_check()
+
+    if not kernel_report["ok"]:
+        print("🚫 Commit blocked (kernel violations):")
+        for i in kernel_report["issues"]:
             print(" -", i)
         return
 
@@ -145,9 +151,22 @@ def trigger_commit():
 
 class ChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        if event.src_path.endswith(".py"):
-            print(f"🧠 Change detected: {event.src_path}")
-            trigger_commit()
+        if not event.src_path.endswith(".py"):
+            return
+
+        print(f"🧠 Change detected: {event.src_path}")
+
+        # 1. REAL-TIME AST CHECK (FIXED LOCATION)
+        ast_check = run_ast_kernel_check(event.src_path)
+
+        if not ast_check.get("ok", False):
+            print("🚫 AST KERNEL BLOCK:")
+            for i in ast_check.get("issues", []):
+                print(" -", i)
+            return
+
+        # 2. continue pipeline
+        trigger_commit()
 
 
 def start_auto_commit():
