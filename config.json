@@ -1,0 +1,19 @@
+{
+  "mode": "auto",
+  "profiles": {
+    "laptop": {
+      "model": "phi3",
+      "keep_alive": "2m",
+      "max_cache": 15,
+      "semantic_threshold": 0.78,
+      "instant_only": true
+    },
+    "desktop": {
+      "model": "qwen2.5-coder",
+      "keep_alive": "20m",
+      "max_cache": 100,
+      "semantic_threshold": 0.65,
+      "instant_only": false
+    }
+  }
+}
