@@ -2,48 +2,57 @@ import os
 import sys
 import time
 import subprocess
+import threading
 from threading import Timer
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..")
-    )
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from agent.ast_kernel_guard import run_ast_kernel_check
 from agent.pipeline_controller import run_full_pipeline
 
-
 DEBOUNCE_SECONDS = 2.5
+
 timer = None
+commit_lock = threading.Lock()
+
+
+def safe_run(command):
+    try:
+        return subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+    except Exception as e:
+        print("⚠️ subprocess error:", e)
+        return None
 
 
 def get_git_diff():
-    try:
-        result = subprocess.run(
-            ["git", "diff", "--cached"],
-            capture_output=True,
-            text=True
-        )
+    result = safe_run(["git", "diff", "--cached"])
 
-        if not result.stdout.strip():
-            result = subprocess.run(
-                ["git", "diff"],
-                capture_output=True,
-                text=True
-            )
-
+    if result and result.stdout.strip():
         return result.stdout
-    except Exception:
-        return ""
+
+    result = safe_run(["git", "diff"])
+
+    if result:
+        return result.stdout or ""
+
+    return ""
 
 
-def generate_commit_message(diff: str):
+def generate_commit_message(diff):
+    if not diff:
+        diff = ""
+
     diff_lower = diff.lower()
+
     tags = []
 
     if "router.py" in diff_lower:
@@ -72,46 +81,57 @@ def generate_commit_message(diff: str):
     else:
         change_type = "update"
 
-    tag_str = ", ".join(tags) if tags else "system"
-    return f"{change_type}: update {tag_str}"
+    tag_text = ", ".join(tags) if tags else "system"
+
+    return f"{change_type}: update {tag_text}"
 
 
 def git_commit(message):
-    try:
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", message], check=True)
-        print(f"✅ Semantic commit: {message}")
-    except subprocess.CalledProcessError as e:
-        print("⚠️ Commit failed:", e)
+    with commit_lock:
+        try:
+            safe_run(["git", "add", "."])
+
+            result = safe_run(
+                [
+                    "git",
+                    "commit",
+                    "-m",
+                    message
+                ]
+            )
+
+            if result and result.returncode == 0:
+                print(f"✅ Semantic commit: {message}")
+            else:
+                print("⚠️ Commit skipped")
+
+        except Exception as e:
+            print("⚠️ Commit error:", e)
 
 
 def safe_commit():
+    try:
+        diff = get_git_diff()
 
-    report = run_full_pipeline(
-        file_path=".",
-        diff=get_git_diff()
-    )
+        report = run_full_pipeline(
+            file_path=".",
+            diff=diff
+        )
 
-    state = report.get("state")
+        if not report.get("ok"):
+            print("🚫 Pipeline blocked:")
 
-    if not report["ok"]:
-        print(f"🚫 STATE: {state}")
+            for issue in report.get("issues", []):
+                print(" -", issue)
 
-        print("PIPELINE BLOCKED:")
+            return
 
-        for issue in report["issues"]:
-            print(" -", issue)
+        message = generate_commit_message(diff)
 
-        if report.get("healing"):
-            print("\n🛠 HEALING:")
-            for repair in report["healing"].get("repairs", []):
-                print(" →", repair["suggested_fix"])
+        git_commit(message)
 
-        return
-
-    print(f"🟢 STATE: {state}")
-
-    git_commit(generate_commit_message(get_git_diff()))
+    except Exception as e:
+        print("🔥 Auto commit failure:", e)
 
 
 def trigger_commit():
@@ -120,42 +140,57 @@ def trigger_commit():
     if timer:
         timer.cancel()
 
-    timer = Timer(DEBOUNCE_SECONDS, safe_commit)
+    timer = Timer(
+        DEBOUNCE_SECONDS,
+        safe_commit
+    )
+
+    timer.daemon = True
     timer.start()
 
 
 class ChangeHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
+        try:
+            if not event.src_path.endswith(".py"):
+                return
 
-        if not event.src_path.endswith(".py"):
-            return
+            print(f"🧠 Change detected: {event.src_path}")
 
-        print(f"🧠 Change detected: {event.src_path}")
+            ast_check = run_ast_kernel_check(event.src_path)
 
-        ast_check = run_ast_kernel_check(event.src_path)
+            if not ast_check.get("ok", False):
+                print("🚫 AST BLOCK:")
 
-        if not ast_check.get("ok", False):
-            print("🚫 AST BLOCK:")
+                for issue in ast_check.get("issues", []):
+                    print(" -", issue)
 
-            for issue in ast_check.get("issues", []):
-                print(" -", issue)
+                return
 
-            return
+            trigger_commit()
 
-        trigger_commit()
+        except Exception as e:
+            print("🔥 Watchdog error:", e)
 
 
 def start_auto_commit():
     observer = Observer()
-    observer.schedule(ChangeHandler(), path=".", recursive=True)
+
+    observer.schedule(
+        ChangeHandler(),
+        path=".",
+        recursive=True
+    )
+
     observer.start()
 
-    print("🤖 STATE MACHINE AUTO-COMMIT RUNNING...")
+    print("🤖 Kernel-aware autonomous commit system running...")
 
     try:
         while True:
             time.sleep(1)
+
     except KeyboardInterrupt:
         observer.stop()
 

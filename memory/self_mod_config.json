@@ -1,0 +1,9 @@
+{
+  "ast_weight": 1.0,
+  "kernel_weight": 1.0,
+  "realtime_weight": 1.0,
+  "audit_weight": 1.0,
+  "retry_limit": 10,
+  "strict_mode": true,
+  "last_update": 1782237325.0173779
+}
