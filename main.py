@@ -6,13 +6,22 @@ from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
 
+# OPTIONAL: system integrity layer (safe import)
+try:
+    from agent.system_integrity import run_system_check
+    INTEGRITY_ENABLED = True
+except Exception:
+    INTEGRITY_ENABLED = False
+
+
 # -----------------------------
 # TOOL REGISTRATION
 # -----------------------------
 registry.register("http_get", http_get)
 
+
 # -----------------------------
-# SYSTEM BOOT
+# BOOT SYSTEM
 # -----------------------------
 kernel = load_kernel()
 profile, mode = load_config()
@@ -21,15 +30,33 @@ print(f"🧠 Kernel loaded")
 print(f"🧠 Agent starting in {mode.upper()} mode")
 print("Type 'exit' to quit.\n")
 
+
 # -----------------------------
-# KERNEL PREVIEW (SAFE DEBUG)
+# KERNEL PREVIEW (SAFE)
 # -----------------------------
 try:
     print("---- KERNEL PREVIEW ----")
-    print(kernel.get("raw", "")[:200])
+    raw = kernel.get("raw", "")
+    print(raw[:200] if isinstance(raw, str) else str(raw)[:200])
     print("------------------------\n")
 except Exception as e:
     print(f"⚠️ Kernel preview error: {e}")
+
+
+# -----------------------------
+# SYSTEM INTEGRITY CHECK (BOOT)
+# -----------------------------
+if INTEGRITY_ENABLED:
+    report = run_system_check(kernel)
+
+    if report["issues"]:
+        print("🧠 SYSTEM INTEGRITY WARNINGS:")
+        for issue in report["issues"]:
+            print(" -", issue)
+        print("")
+    else:
+        print("🧠 System integrity: OK\n")
+
 
 # -----------------------------
 # MAIN LOOP

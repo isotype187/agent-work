@@ -1,5 +1,6 @@
 # agent/router.py
 
+import ast
 from agent.llm import ask_llm, instant_response
 from agent.config import load_config
 
@@ -7,33 +8,49 @@ DEBUG = False
 
 
 # -----------------------------
-# ROUTER SELF-AUDIT SYSTEM
+# AST-BASED SELF AUDIT (HARDENED)
 # -----------------------------
 
 def self_audit_router():
     """
-    Lightweight structural integrity check.
-    Runs on every request (debug only).
+    Structural integrity check using AST (real syntax parsing).
+    Safe, fast, and accurate.
     """
 
     issues = []
 
     try:
         with open(__file__, "r", encoding="utf-8") as f:
-            code = f.read()
+            source = f.read()
 
-        # Detect duplicated LLM blocks
-        llm_block_marker = "LLM MODE (MAIN PATH)"
-        if code.count(llm_block_marker) > 1:
-            issues.append("⚠️ Duplicate LLM block detected")
+        # -----------------------------
+        # PARSE INTO AST
+        # -----------------------------
+        tree = ast.parse(source)
 
-        # Detect duplicated return patterns (basic safeguard)
-        if code.count("return llm(prompt, profile)") > 1:
-            issues.append("⚠️ Duplicate LLM return path detected")
+        # Track functions
+        functions = []
 
-        # Detect accidental repeated function definitions
-        if code.count("def route_request") > 1:
-            issues.append("⚠️ Duplicate route_request definition detected")
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                functions.append(node.name)
+
+        # Detect duplicate function definitions
+        if len(functions) != len(set(functions)):
+            issues.append("⚠️ Duplicate function definitions detected (AST)")
+
+        # Ensure route_request exists exactly once
+        if functions.count("route_request") > 1:
+            issues.append("⚠️ Multiple route_request definitions detected")
+
+        # Basic structural sanity check: must contain router
+        if "route_request" not in functions:
+            issues.append("⚠️ route_request missing from router file")
+
+        # Detect syntax health implicitly (AST parse failure would already throw)
+
+    except SyntaxError as e:
+        issues.append(f"🚨 SYNTAX ERROR in router.py: {e}")
 
     except Exception as e:
         issues.append(f"⚠️ Self-audit failed: {str(e)}")
@@ -75,10 +92,11 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
     intent = detect_intent(prompt)
 
     # -----------------------------
-    # SELF AUDIT (DEBUG MODE ONLY)
+    # HARDENED SELF AUDIT (DEBUG ONLY)
     # -----------------------------
     if DEBUG:
         issues = self_audit_router()
+
         if issues:
             print("🧠 ROUTER SELF-AUDIT REPORT:")
             for i in issues:
