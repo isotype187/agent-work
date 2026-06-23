@@ -1,196 +1,177 @@
-import os
-import sys
 import time
-import subprocess
 import threading
-from threading import Timer
+import subprocess
+import os
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from agent.ast_kernel_guard import run_ast_kernel_check
-from agent.pipeline_controller import run_full_pipeline
+from agent.system_integrity import run_system_check
+from agent.kernel_guard import run_kernel_check
 
-DEBOUNCE_SECONDS = 2.5
 
+DEBOUNCE_SECONDS = 3.5
 timer = None
-commit_lock = threading.Lock()
+last_event_time = 0
 
 
-def safe_run(command):
-    try:
-        return subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace"
-        )
-    except Exception as e:
-        print("⚠️ subprocess error:", e)
-        return None
-
-
+# -----------------------------
+# SAFE GIT DIFF
+# -----------------------------
 def get_git_diff():
-    result = safe_run(["git", "diff", "--cached"])
-
-    if result and result.stdout.strip():
-        return result.stdout
-
-    result = safe_run(["git", "diff"])
-
-    if result:
+    try:
+        result = subprocess.run(
+            ["git", "diff"],
+            capture_output=True,
+            text=True
+        )
         return result.stdout or ""
+    except Exception:
+        return ""
 
-    return ""
 
-
-def generate_commit_message(diff):
-    if not diff:
-        diff = ""
-
+# -----------------------------
+# COMMIT MESSAGE
+# -----------------------------
+def generate_commit_message(diff: str):
+    diff = diff or ""
     diff_lower = diff.lower()
 
     tags = []
 
-    if "router.py" in diff_lower:
-        tags.append("router")
+    if "daemon" in diff_lower:
+        tags.append("daemon")
+
+    if "goal" in diff_lower:
+        tags.append("goal")
+
+    if "reflection" in diff_lower:
+        tags.append("reflection")
 
     if "kernel" in diff_lower:
         tags.append("kernel")
 
-    if "snapshot" in diff_lower:
-        tags.append("snapshot")
-
-    if "registry" in diff_lower:
-        tags.append("tools")
-
-    if "main.py" in diff_lower:
-        tags.append("core")
+    change_type = "update"
 
     if "def " in diff_lower:
         change_type = "refactor"
-    elif "+" in diff and "-" in diff:
-        change_type = "modify"
-    elif "+" in diff:
-        change_type = "add"
-    elif "-" in diff:
-        change_type = "remove"
-    else:
-        change_type = "update"
 
-    tag_text = ", ".join(tags) if tags else "system"
+    tag_str = ", ".join(tags) if tags else "system"
 
-    return f"{change_type}: update {tag_text}"
+    return f"{change_type}: {tag_str}"
 
 
+# -----------------------------
+# COMMIT EXECUTION
+# -----------------------------
 def git_commit(message):
-    with commit_lock:
-        try:
-            safe_run(["git", "add", "."])
-
-            result = safe_run(
-                [
-                    "git",
-                    "commit",
-                    "-m",
-                    message
-                ]
-            )
-
-            if result and result.returncode == 0:
-                print(f"✅ Semantic commit: {message}")
-            else:
-                print("⚠️ Commit skipped")
-
-        except Exception as e:
-            print("⚠️ Commit error:", e)
-
-
-def safe_commit():
     try:
-        diff = get_git_diff()
+        subprocess.run(["git", "add", "."], check=True)
 
-        report = run_full_pipeline(
-            file_path=".",
-            diff=diff
+        subprocess.run(
+            ["git", "commit", "-m", message],
+            check=True
         )
 
-        if not report.get("ok"):
-            print("🚫 Pipeline blocked:")
-
-            for issue in report.get("issues", []):
-                print(" -", issue)
-
-            return
-
-        message = generate_commit_message(diff)
-
-        git_commit(message)
+        print(f"✅ Semantic commit: {message}")
 
     except Exception as e:
-        print("🔥 Auto commit failure:", e)
+        print("⚠️ Commit failed:", e)
 
 
+# -----------------------------
+# SAFE COMMIT (STABILIZED)
+# -----------------------------
+def safe_commit():
+    diff = get_git_diff()
+
+    if not diff.strip():
+        return
+
+    # system check
+    report = run_system_check()
+
+    if report.get("issues"):
+        print("🚫 SYSTEM BLOCK")
+        return
+
+    # kernel check
+    kernel_report = run_kernel_check()
+
+    if not kernel_report.get("ok"):
+        print("🚫 KERNEL BLOCK")
+        return
+
+    message = generate_commit_message(diff)
+    git_commit(message)
+
+
+# -----------------------------
+# DEBOUNCED TRIGGER
+# -----------------------------
 def trigger_commit():
     global timer
 
     if timer:
         timer.cancel()
 
-    timer = Timer(
-        DEBOUNCE_SECONDS,
-        safe_commit
-    )
-
-    timer.daemon = True
+    timer = threading.Timer(DEBOUNCE_SECONDS, safe_commit)
     timer.start()
 
 
+# -----------------------------
+# WATCHER (FIXED ANTI-SPAM)
+# -----------------------------
 class ChangeHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
+        global last_event_time
+
+        if not event.src_path.endswith(".py"):
+            return
+
+        now = time.time()
+
+        # HARD COOLDOWN (prevents watchdog storms)
+        if now - last_event_time < 2.0:
+            return
+
+        last_event_time = now
+
+        print(f"🧠 Change detected: {event.src_path}")
+
+        # AST CHECK (SAFE READ ONLY AFTER FILE SETTLES)
+        time.sleep(0.3)
+
         try:
-            if not event.src_path.endswith(".py"):
-                return
-
-            print(f"🧠 Change detected: {event.src_path}")
-
             ast_check = run_ast_kernel_check(event.src_path)
 
             if not ast_check.get("ok", False):
-                print("🚫 AST BLOCK:")
-
-                for issue in ast_check.get("issues", []):
-                    print(" -", issue)
-
+                print("🚫 AST BLOCK")
                 return
 
-            trigger_commit()
-
         except Exception as e:
-            print("🔥 Watchdog error:", e)
+            print("⚠️ AST ERROR (ignored):", e)
+            return
+
+        trigger_commit()
 
 
+# -----------------------------
+# START WATCHER
+# -----------------------------
 def start_auto_commit():
     observer = Observer()
-
-    observer.schedule(
-        ChangeHandler(),
-        path=".",
-        recursive=True
-    )
+    observer.schedule(ChangeHandler(), path=".", recursive=True)
 
     observer.start()
 
-    print("🤖 Kernel-aware autonomous commit system running...")
+    print("🤖 Auto-commit running (STABLE MODE)")
 
     try:
         while True:
             time.sleep(1)
-
     except KeyboardInterrupt:
         observer.stop()
 
