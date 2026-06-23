@@ -1,6 +1,7 @@
 import time
 import threading
 
+from agent.reflection_engine import record_cycle, generate_reflection_goals
 from agent.goal_graph import (
     stabilize_graph,
     get_ready_goals
@@ -19,13 +20,17 @@ class AgentDaemon:
     def _tick(self):
         while self.running:
             try:
-                # 🧠 keep system stable
                 stabilize_graph()
+
+                # 🪞 REFLECTION STEP (NEW)
+                generate_reflection_goals()
 
                 ready = get_ready_goals()
 
                 if ready:
                     goal = ready[0]
+
+                    record_cycle(goal["goal"])
 
                     print(f"🧠 DAEMON GOAL: {goal['goal']}")
 
@@ -35,14 +40,18 @@ class AgentDaemon:
                     )
 
                     if report.get("ok"):
+                        record_cycle("COMMIT_SUCCESS")
                         print("✅ DAEMON CYCLE COMPLETE")
                     else:
+                        record_cycle("BLOCKED")
                         print("🚫 DAEMON BLOCKED")
 
                 else:
+                    record_cycle("IDLE")
                     print("🟡 DAEMON IDLE: no goals")
 
             except Exception as e:
+                record_cycle("ERROR")
                 print("🔥 DAEMON ERROR:", e)
 
             time.sleep(self.interval)
