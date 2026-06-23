@@ -7,29 +7,56 @@ DEBUG = False
 
 
 # -----------------------------
-# ROUTING CORE
+# ROUTER SELF-AUDIT SYSTEM
+# -----------------------------
+
+def self_audit_router():
+    """
+    Lightweight structural integrity check.
+    Runs on every request (debug only).
+    """
+
+    issues = []
+
+    try:
+        with open(__file__, "r", encoding="utf-8") as f:
+            code = f.read()
+
+        # Detect duplicated LLM blocks
+        llm_block_marker = "LLM MODE (MAIN PATH)"
+        if code.count(llm_block_marker) > 1:
+            issues.append("⚠️ Duplicate LLM block detected")
+
+        # Detect duplicated return patterns (basic safeguard)
+        if code.count("return llm(prompt, profile)") > 1:
+            issues.append("⚠️ Duplicate LLM return path detected")
+
+        # Detect accidental repeated function definitions
+        if code.count("def route_request") > 1:
+            issues.append("⚠️ Duplicate route_request definition detected")
+
+    except Exception as e:
+        issues.append(f"⚠️ Self-audit failed: {str(e)}")
+
+    return issues
+
+
+# -----------------------------
+# INTENT DETECTION
 # -----------------------------
 
 def detect_intent(prompt: str) -> str:
-    """
-    Ultra-light intent detection (NO LLM, NO HEAVY OPS)
-    """
-
     p = prompt.lower().strip()
 
-    # instant chat responses
     if p in {"hi", "hello", "hey", "yo"}:
         return "instant"
 
-    # system queries
     if any(x in p for x in ["status", "memory", "uptime", "running"]):
         return "instant"
 
-    # tool hinting (future expansion)
     if any(x in p for x in ["http", "https", "fetch", "scrape"]):
         return "tool"
 
-    # default → LLM
     return "llm"
 
 
@@ -48,32 +75,19 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
     intent = detect_intent(prompt)
 
     # -----------------------------
-    # 🧠 KERNEL LOAD (SAFE LAYER)
+    # SELF AUDIT (DEBUG MODE ONLY)
     # -----------------------------
-    rules = {}
-    tool_policy = "open"
-
-    if isinstance(kernel, dict):
-        rules = kernel.get("rules", {}) or {}
-        tool_policy = rules.get("rules", {}).get("tool_access", "open")
-
-    def is_tool_allowed(tool_name: str) -> bool:
-        if tool_policy == "strict":
-            try:
-                if isinstance(tools, dict):
-                    return tool_name in tools
-                if hasattr(tools, "registry"):
-                    return tool_name in tools.registry
-                return True
-            except Exception:
-                return True
-        return True
-
     if DEBUG:
-        print(f"🧭 ROUTER → {intent} | MODEL → {profile['model']} | TOOL_POLICY → {tool_policy}")
+        issues = self_audit_router()
+        if issues:
+            print("🧠 ROUTER SELF-AUDIT REPORT:")
+            for i in issues:
+                print(" -", i)
+
+        print(f"🧭 ROUTER → {intent} | MODEL → {profile['model']}")
 
     # -------------------------
-    # INSTANT MODE (NO LLM)
+    # INSTANT MODE
     # -------------------------
     if intent == "instant":
         return instant_response(prompt)
@@ -82,7 +96,6 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
     # TOOL MODE
     # -------------------------
     if intent == "tool":
-        # basic heuristic tool selection (your system can evolve later)
         selected_tool = None
 
         p = prompt.lower()
@@ -90,11 +103,6 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
         if any(x in p for x in ["http", "https", "fetch", "scrape"]):
             selected_tool = "http_get"
 
-        # 🧠 KERNEL ENFORCEMENT
-        if selected_tool and not is_tool_allowed(selected_tool):
-            return "🚫 Tool blocked by kernel policy (strict mode)"
-
-        # TOOL EXECUTION
         if selected_tool and tools:
             try:
                 if isinstance(tools, dict):
@@ -113,7 +121,7 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
         return "[TOOL SYSTEM READY - NOT YET WIRED]"
 
     # -------------------------
-    # LLM MODE (MAIN PATH)
+    # LLM MODE
     # -------------------------
     if llm is None:
         llm = ask_llm

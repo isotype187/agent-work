@@ -1,58 +1,52 @@
+# main.py
+
 from agent.router import route_request
 from agent.tools.web_tools import http_get
 from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
 
+# -----------------------------
+# TOOL REGISTRATION
+# -----------------------------
+registry.register("http_get", http_get)
 
-def boot_agent():
-    # Load kernel (system rules / architecture spec)
-    kernel = load_kernel()
+# -----------------------------
+# SYSTEM BOOT
+# -----------------------------
+kernel = load_kernel()
+profile, mode = load_config()
 
-    print("🧠 Kernel loaded successfully")
-    print("---- KERNEL ACTIVE (preview) ----")
-    print(kernel[:250])
-    print("----------------------------------\n")
+print(f"🧠 Kernel loaded")
+print(f"🧠 Agent starting in {mode.upper()} mode")
+print("Type 'exit' to quit.\n")
 
-    return kernel
+# -----------------------------
+# KERNEL PREVIEW (SAFE DEBUG)
+# -----------------------------
+try:
+    print("---- KERNEL PREVIEW ----")
+    print(kernel.get("raw", "")[:200])
+    print("------------------------\n")
+except Exception as e:
+    print(f"⚠️ Kernel preview error: {e}")
 
+# -----------------------------
+# MAIN LOOP
+# -----------------------------
+while True:
+    user_input = input("APP IDEA > ")
 
-def setup_agent():
-    # Register tools once
-    registry.register("http_get", http_get)
+    if user_input.lower().strip() == "exit":
+        break
 
-    # Load config (profile + mode)
-    profile, mode = load_config()
+    response = route_request(
+        user_input,
+        profile=profile,
+        tools=registry,
+        kernel=kernel
+    )
 
-    print(f"🧠 Agent starting in {mode.upper()} mode")
-    print("Type 'exit' to quit.\n")
-
-    return profile, mode
-
-
-def main():
-    # Boot phase (system initialization)
-    kernel = boot_agent()
-    profile, mode = setup_agent()
-
-    # Runtime loop
-    while True:
-        user_input = input("APP IDEA > ")
-
-        if user_input.lower().strip() == "exit":
-            print("👋 Shutting down agent...")
-            break
-
-        response = route_request(
-            user_input,
-            profile=profile,
-            tools=registry
-        )
-
-        print("\n--- RESPONSE ---")
-        print(response)
-        print("----------------\n")
-
-
-if __name__ == "__main__":
-    main()
+    print("\n--- RESPONSE ---")
+    print(response)
+    print("----------------\n")
