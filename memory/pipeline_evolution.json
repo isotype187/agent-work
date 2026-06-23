@@ -1,0 +1,9 @@
+{
+  "violations": {
+    "\u26a0\ufe0f kernel not loaded into integrity layer": {
+      "count": 1,
+      "last_seen": 1782228433.7312665
+    }
+  },
+  "suggestions": {}
+}
