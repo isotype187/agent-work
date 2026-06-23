@@ -4,7 +4,9 @@ from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
 from agent.daemon import daemon
+from agent.env_boot import load_project_root
 
+load_project_root()
 try:
     from agent.system_integrity import run_system_check
     INTEGRITY_ENABLED = True
