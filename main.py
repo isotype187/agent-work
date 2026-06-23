@@ -1,12 +1,14 @@
+from agent.env_boot import load_project_root
+load_project_root()
+
 from agent.router import route_request
 from agent.tools.web_tools import http_get
 from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
-from agent.daemon import daemon
-from agent.env_boot import load_project_root
+from agent.daemon import AgentDaemon
 
-load_project_root()
+# OPTIONAL: system integrity layer
 try:
     from agent.system_integrity import run_system_check
     INTEGRITY_ENABLED = True
@@ -14,8 +16,14 @@ except Exception:
     INTEGRITY_ENABLED = False
 
 
+# -----------------------------
+# TOOL REGISTRATION
+# -----------------------------
 registry.register("http_get", http_get)
 
+# -----------------------------
+# BOOT SYSTEM
+# -----------------------------
 kernel = load_kernel()
 profile, mode = load_config()
 
@@ -23,6 +31,9 @@ print("🧠 Kernel loaded")
 print(f"🧠 Agent starting in {mode.upper()} mode")
 print("Type 'exit' to quit.\n")
 
+# -----------------------------
+# KERNEL PREVIEW
+# -----------------------------
 try:
     print("---- KERNEL PREVIEW ----")
     raw = kernel.get("raw", "")
@@ -31,6 +42,9 @@ try:
 except Exception as e:
     print(f"⚠️ Kernel preview error: {e}")
 
+# -----------------------------
+# SYSTEM INTEGRITY CHECK
+# -----------------------------
 if INTEGRITY_ENABLED:
     report = run_system_check(kernel)
 
@@ -44,8 +58,10 @@ if INTEGRITY_ENABLED:
 
 
 # -----------------------------
-# START DAEMON (AUTONOMOUS LAYER)
+# START DAEMON
 # -----------------------------
+daemon = AgentDaemon(interval=5)
+
 try:
     daemon.start()
     print("🚀 Daemon mode: ACTIVE\n")
@@ -54,7 +70,7 @@ except Exception as e:
 
 
 # -----------------------------
-# MAIN LOOP (INTERACTIVE LAYER)
+# MAIN LOOP
 # -----------------------------
 while True:
     try:
@@ -76,7 +92,6 @@ while True:
 
     except KeyboardInterrupt:
         break
-
     except Exception as e:
         print("🔥 Runtime error:", e)
 
