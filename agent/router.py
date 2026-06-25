@@ -49,6 +49,10 @@ def select_tool(prompt: str):
     if any(x in p for x in ["push", "git push", "commit", "save project", "upload code"]):
         return "git_push"
 
+    # GITsnapshot TOOL (single command abstraction)
+    if any(x in p for x in ["snapshot", "save state", "save project", "backup project"]):
+        return "snapshot"
+
     # STATUS TOOL
     if p in {"status", "git status"}:
         return "git_status"
