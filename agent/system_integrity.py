@@ -4,13 +4,10 @@ import ast
 from pathlib import Path
 
 
-# -----------------------------
-# CORE INTEGRITY CHECKER
-# -----------------------------
-
 def run_system_check(kernel=None):
     """
-    Checks structural consistency across the agent system.
+    Structural integrity checker for the agent system.
+    Detects missing files, router structure issues, and kernel inconsistencies.
     """
 
     report = {
@@ -39,32 +36,52 @@ def run_system_check(kernel=None):
     # -----------------------------
     # ROUTER STRUCTURE CHECK
     # -----------------------------
-    try:
-        router_path = Path("agent/router.py")
+    router_path = Path("agent/router.py")
 
-        if router_path.exists():
-            code = router_path.read_text(encoding="utf-8")
+    if router_path.exists():
+        try:
+            code = router_path.read_text(encoding="utf-8", errors="replace")
             tree = ast.parse(code)
 
-            functions = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+            functions = [
+                node.name
+                for node in ast.walk(tree)
+                if isinstance(node, ast.FunctionDef)
+            ]
 
+            # Must contain main entry point
             if "route_request" not in functions:
                 report["issues"].append("❌ router missing route_request")
 
+            # Detect duplicates (should never happen, but good safeguard)
             if functions.count("route_request") > 1:
                 report["issues"].append("⚠️ duplicate route_request detected")
 
-    except Exception as e:
-        report["issues"].append(f"⚠️ router parse failed: {e}")
+        except SyntaxError as e:
+            report["issues"].append(f"❌ router syntax error: {e}")
+
+        except Exception as e:
+            report["issues"].append(f"⚠️ router parse failed: {type(e).__name__}: {e}")
 
     # -----------------------------
-    # KERNEL VALIDATION
+    # KERNEL VALIDATION (STABILIZED)
     # -----------------------------
     if kernel is None:
         report["issues"].append("⚠️ kernel not loaded into integrity layer")
+
     else:
-        if not isinstance(kernel, dict):
-            report["issues"].append("⚠️ kernel is not a dict structure")
+        # Accept multiple kernel formats safely (prevents false failures)
+        if isinstance(kernel, dict):
+            pass  # expected format
+
+        elif isinstance(kernel, str):
+            # allowed but flagged as informational
+            report["issues"].append("⚠️ kernel is raw string (expected dict after parsing)")
+
+        else:
+            report["issues"].append(
+                f"⚠️ kernel unexpected type: {type(kernel).__name__}"
+            )
 
     # -----------------------------
     # RESULT

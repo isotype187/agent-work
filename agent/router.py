@@ -1,5 +1,3 @@
-# agent/router.py
-
 import ast
 from agent.llm import ask_llm, instant_response
 from agent.config import load_config
@@ -8,83 +6,120 @@ DEBUG = False
 
 
 # -----------------------------
-# AST-BASED SELF AUDIT (HARDENED)
+# AST SELF AUDIT (SAFE DEBUG ONLY)
 # -----------------------------
-
 def self_audit_router():
-    """
-    Structural integrity check using AST (real syntax parsing).
-    Safe, fast, and accurate.
-    """
-
     issues = []
 
     try:
         with open(__file__, "r", encoding="utf-8") as f:
             source = f.read()
 
-        # -----------------------------
-        # PARSE INTO AST
-        # -----------------------------
         tree = ast.parse(source)
 
-        # Track functions
-        functions = []
+        functions = [
+            node.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef)
+        ]
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                functions.append(node.name)
-
-        # Detect duplicate function definitions
         if len(functions) != len(set(functions)):
-            issues.append("⚠️ Duplicate function definitions detected (AST)")
+            issues.append("⚠️ Duplicate function definitions detected")
 
-        # Ensure route_request exists exactly once
-        if functions.count("route_request") > 1:
-            issues.append("⚠️ Multiple route_request definitions detected")
-
-        # Basic structural sanity check: must contain router
         if "route_request" not in functions:
-            issues.append("⚠️ route_request missing from router file")
-
-        # Detect syntax health implicitly (AST parse failure would already throw)
-
-    except SyntaxError as e:
-        issues.append(f"🚨 SYNTAX ERROR in router.py: {e}")
+            issues.append("⚠️ route_request missing")
 
     except Exception as e:
-        issues.append(f"⚠️ Self-audit failed: {str(e)}")
+        issues.append(f"⚠️ Self-audit failed: {type(e).__name__}: {e}")
 
     return issues
 
 
 # -----------------------------
-# INTENT DETECTION
+# TOOL DETECTION (SINGLE SOURCE OF TRUTH)
 # -----------------------------
+def select_tool(prompt: str):
+    p = prompt.lower().strip()
 
+    # WEB TOOL
+    if any(x in p for x in ["http", "https", "fetch", "scrape", "http_get"]):
+        return "http_get"
+
+    # GIT TOOL (single command abstraction)
+    if any(x in p for x in ["push", "git push", "commit", "save project", "upload code"]):
+        return "git_push"
+
+    # STATUS TOOL
+    if p in {"status", "git status"}:
+        return "git_status"
+
+    return None
+
+
+# -----------------------------
+# INTENT DETECTION (TRUTH = TOOL FIRST)
+# -----------------------------
 def detect_intent(prompt: str) -> str:
     p = prompt.lower().strip()
 
-    if p in {"hi", "hello", "hey", "yo"}:
-        return "instant"
-
-    if any(x in p for x in ["status", "memory", "uptime", "running"]):
-        return "instant"
-
-    if any(x in p for x in ["http", "https", "fetch", "scrape"]):
+    # TOOL ALWAYS TAKES PRIORITY
+    if select_tool(prompt):
         return "tool"
+
+    if p in {"hi", "hello", "hey", "yo", "ping"}:
+        return "instant"
+
+    if len(p) <= 2:
+        return "instant"
 
     return "llm"
 
 
 # -----------------------------
+# PAYLOAD EXTRACTION
+# -----------------------------
+def extract_payload(prompt: str):
+    for token in prompt.split():
+        if token.startswith("http"):
+            return token
+    return prompt
+
+
+# -----------------------------
+# TOOL EXECUTION WRAPPER
+# -----------------------------
+def run_tool(tools, tool_name, payload):
+    if not tools:
+        return "[TOOL: NO REGISTRY]"
+
+    try:
+        tool_fn = None
+
+        if isinstance(tools, dict):
+            tool_fn = tools.get(tool_name)
+        else:
+            tool_fn = getattr(tools, "get", lambda x: None)(tool_name)
+
+        if not tool_fn:
+            return f"[TOOL NOT FOUND: {tool_name}]"
+
+        return tool_fn(payload)
+
+    except Exception as e:
+        return f"⚠️ TOOL ERROR: {type(e).__name__}: {e}"
+
+
+# -----------------------------
 # MAIN ROUTER
 # -----------------------------
-
-def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
-    """
-    Single brain entry point for entire agent system
-    """
+def route_request(
+    prompt: str,
+    tools=None,
+    profile=None,
+    memory=None,
+    session_id: str = "default",
+    kernel=None
+):
 
     if profile is None:
         profile, _ = load_config()
@@ -92,59 +127,52 @@ def route_request(prompt: str, tools=None, profile=None, llm=None, kernel=None):
     intent = detect_intent(prompt)
 
     # -----------------------------
-    # HARDENED SELF AUDIT (DEBUG ONLY)
+    # DEBUG
     # -----------------------------
     if DEBUG:
         issues = self_audit_router()
-
         if issues:
-            print("🧠 ROUTER SELF-AUDIT REPORT:")
+            print("🧠 ROUTER ISSUES:")
             for i in issues:
                 print(" -", i)
 
-        print(f"🧭 ROUTER → {intent} | MODEL → {profile['model']}")
+        print(f"🧭 intent={intent}")
 
-    # -------------------------
+    # -----------------------------
     # INSTANT MODE
-    # -------------------------
+    # -----------------------------
     if intent == "instant":
         return instant_response(prompt)
 
-    # -------------------------
+    # -----------------------------
     # TOOL MODE
-    # -------------------------
+    # -----------------------------
     if intent == "tool":
-        selected_tool = None
+        tool_name = select_tool(prompt)
+        payload = extract_payload(prompt)
 
-        p = prompt.lower()
+        result = run_tool(tools, tool_name, payload)
 
-        if any(x in p for x in ["http", "https", "fetch", "scrape"]):
-            selected_tool = "http_get"
+        if memory:
+            memory.add(session_id, "tool", str(result))
 
-        if selected_tool and tools:
-            try:
-                if isinstance(tools, dict):
-                    tool_fn = tools.get(selected_tool)
-                elif hasattr(tools, "get"):
-                    tool_fn = tools.get(selected_tool)
-                else:
-                    tool_fn = None
+        return result
 
-                if tool_fn:
-                    return tool_fn(prompt)
-
-            except Exception as e:
-                return f"⚠️ Tool error: {str(e)}"
-
-        return "[TOOL SYSTEM READY - NOT YET WIRED]"
-
-    # -------------------------
+    # -----------------------------
     # LLM MODE
-    # -------------------------
-    if llm is None:
-        llm = ask_llm
-
+    # -----------------------------
     try:
-        return llm(prompt, profile)
+        result = ask_llm(
+            prompt=prompt,
+            profile=profile,
+            memory=memory,
+            session_id=session_id
+        )
+
+        if memory:
+            memory.add(session_id, "assistant", str(result))
+
+        return result
+
     except Exception as e:
-        return f"⚠️ LLM error: {str(e)}"
+        return f"⚠️ LLM ERROR: {type(e).__name__}: {e}"

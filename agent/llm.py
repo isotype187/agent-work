@@ -1,9 +1,13 @@
+# agent/llm.py
+
 import requests
 import time
+
 DEBUG = False
 
+
 # -----------------------------
-# INSTANT RESPONSES (ULTRA LIGHT)
+# INSTANT RESPONSES
 # -----------------------------
 INSTANT_RULES = {
     "hello": "Hey 👋",
@@ -14,63 +18,74 @@ INSTANT_RULES = {
 }
 
 
-# -----------------------------
-# INSTANT MODE CHECK
-# -----------------------------
 def is_simple(prompt: str) -> bool:
     if not prompt:
         return True
 
     p = prompt.strip().lower()
 
-    if p in INSTANT_RULES:
-        return True
-
-    if len(p) <= 5:
-        return True
-
-    return False
+    return p in INSTANT_RULES or len(p) <= 5
 
 
 def instant_response(prompt: str) -> str:
-    return INSTANT_RULES.get(
-        prompt.strip().lower(),
-        "⚡ Instant response"
-    )
+    return INSTANT_RULES.get(prompt.strip().lower(), "⚡ Instant response")
 
 
 # -----------------------------
-# MAIN LLM CALL (PROFILE DRIVEN)
+# MEMORY BUILDER
 # -----------------------------
-def ask_llm(prompt: str, profile: dict):
-    """
-    SINGLE LLM ENTRY POINT.
-    Everything goes through here.
-    """
+def build_prompt(prompt: str, memory_context: str | None):
+    if not memory_context:
+        return prompt
 
-    # -------------------------
-    # INSTANT MODE (NO OLLAMA)
-    # -------------------------
-    if is_simple(prompt):
-        
-        if DEBUG:
-            print("⚡ Instant mode")
-        return instant_response(prompt)
+    return f"""[MEMORY CONTEXT]
+{memory_context}
 
-    # -------------------------
-    # PROFILE SETTINGS
-    # -------------------------
-    model = profile.get("model", "phi3")
-    keep_alive = profile.get("keep_alive", "2m")
+[USER INPUT]
+{prompt}
+"""
 
+
+# -----------------------------
+# MAIN LLM ENTRY
+# -----------------------------
+def ask_llm(prompt: str, profile: dict, memory=None, session_id="default"):
     try:
+        # instant bypass
+        if is_simple(prompt):
+            resp = instant_response(prompt)
+
+            if memory:
+                memory.add(session_id, "assistant", resp)
+
+            return resp
+
+        model = profile.get("model", "phi3")
+        keep_alive = profile.get("keep_alive", "2m")
+
+        # -------------------------
+        # MEMORY READ
+        # -------------------------
+        memory_context = None
+        if memory:
+            try:
+                memory_context = memory.get(session_id)
+                memory.add(session_id, "user", prompt)
+            except Exception:
+                memory_context = None
+
+        final_prompt = build_prompt(prompt, memory_context)
+
+        # -------------------------
+        # OLLAMA CALL
+        # -------------------------
         start = time.time()
 
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={
                 "model": model,
-                "prompt": prompt,
+                "prompt": final_prompt,
                 "stream": False,
                 "keep_alive": keep_alive
             },
@@ -78,14 +93,16 @@ def ask_llm(prompt: str, profile: dict):
         )
 
         data = response.json()
+        output = data.get("response", "[ERROR] No response")
 
-        elapsed = time.time() - start
-        
         if DEBUG:
             print(f"🧠 MODEL: {model}")
-            print(f"⏱ TIME: {elapsed:.2f}s")
+            print(f"⏱ TIME: {time.time() - start:.2f}s")
 
-        return data.get("response", "[ERROR] No response")
+        if memory:
+            memory.add(session_id, "assistant", output)
+
+        return output
 
     except Exception as e:
-        return f"[LLM ERROR] {str(e)}"
+        return f"[LLM ERROR] {type(e).__name__}: {e}"

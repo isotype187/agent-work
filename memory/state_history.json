@@ -1,0 +1,802 @@
+[
+  {
+    "time": 1782336935.588186,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336935.6808228,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336940.7509084,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336940.848562,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336945.9187686,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336946.007377,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336951.0802307,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336951.176366,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336956.2504253,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336956.3458352,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336961.4272552,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336961.5299218,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336966.601341,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336966.6901476,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336971.7735178,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336971.8718948,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336976.9464152,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336977.0383327,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336982.1148052,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336982.2107313,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336987.2824705,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336987.3724217,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336992.4486258,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782336992.5470853,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782336997.6216464,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782336997.7128816,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337002.7874734,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337002.8867137,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337074.0281107,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337074.1705647,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337079.24359,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337079.3394284,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337084.4126215,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337084.5088189,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337089.5951142,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337089.696952,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337094.809267,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337094.9250374,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337099.998685,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337100.1171734,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337105.2104435,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337105.3158886,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337110.4044342,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337110.5277581,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337115.6061256,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337115.7027338,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337120.776122,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337120.8742592,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337125.9482582,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337126.0479336,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337131.1206741,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337131.223844,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337136.2979348,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337136.3939917,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337141.4691372,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337141.5700746,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337146.6418269,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337146.7346325,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337151.8070948,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337151.9096117,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337156.9803736,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337157.0712802,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337162.1477444,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337162.25841,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337167.333765,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337167.4325316,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337172.5156398,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337172.65155,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337177.7398438,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337177.8425891,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337182.9169054,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337183.020789,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337188.0966804,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337188.1925676,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337193.2673457,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337193.3668568,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337198.4393578,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337198.533738,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337203.6052034,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337203.709885,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337208.8005035,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337208.909282,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337213.9975393,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337214.1007578,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337219.2645075,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337219.3698921,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337224.4493282,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337224.5652862,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337229.6413405,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337229.732355,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337234.8053098,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337234.908058,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337239.9850094,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337240.0784566,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337245.1618657,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337245.2648814,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337250.3413692,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337250.4366536,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337255.5108137,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337255.614816,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337260.6919696,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337260.8715558,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337265.9473543,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337266.0500066,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337271.1289182,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337271.2196963,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337276.2967649,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337276.3975732,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337281.4720824,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337281.5632617,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337286.6390557,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337286.7364035,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337291.815131,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337291.9112158,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337296.9859052,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337297.0840957,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337302.159327,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337302.2480981,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337307.3244843,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337307.4275873,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337312.5000932,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337312.5925505,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337317.6682422,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337317.7692661,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337322.8461323,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337322.9433124,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337328.0159643,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337328.1140509,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337333.192048,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337333.2786367,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337338.3528576,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337338.4686,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337343.5459492,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337343.6368494,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337348.7141533,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337348.813206,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337353.89598,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337354.0157428,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337359.1011925,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337359.2089682,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337364.2840183,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337364.3731344,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337369.4596844,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337369.5715451,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337374.6607926,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337374.8234053,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337379.9027293,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337380.004176,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337385.0817914,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337385.173506,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337390.2541184,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337390.3575902,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337395.4410286,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337395.5358808,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337400.611325,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337400.7166371,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337405.7994528,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337405.887722,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337410.9666598,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337411.0642676,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337416.1440105,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337416.239911,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337421.31835,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337421.4177966,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337426.4985442,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337426.5934885,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337431.6771502,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337431.7854767,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337436.864267,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337436.9573114,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337442.0314693,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337442.1308444,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337447.2065737,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337447.2981558,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337452.386271,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337452.4941642,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337457.5843153,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337457.704032,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337462.879849,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337463.0016437,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337468.0782192,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337468.1754262,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337473.2531688,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337473.3576553,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337478.434031,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337478.5330167,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337483.6135383,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337483.7151754,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337488.7963018,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337488.8908231,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337493.970971,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337494.0724037,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337499.1486773,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337499.2428453,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337504.3208601,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337504.422527,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337509.540393,
+    "state": "achieve_clean_commit_state"
+  },
+  {
+    "time": 1782337509.649199,
+    "state": "COMMIT_SUCCESS"
+  },
+  {
+    "time": 1782337514.730848,
+    "state": "reduce_kernel_violations"
+  },
+  {
+    "time": 1782337514.836153,
+    "state": "COMMIT_SUCCESS"
+  }
+]

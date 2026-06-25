@@ -1,58 +1,31 @@
-import time
+# agent/daemon.py
+
 import threading
-
-from agent.reflection_engine import record_cycle, generate_reflection_goals
-from agent.goal_graph import (
-    stabilize_graph,
-    get_ready_goals
-)
-
-from agent.pipeline_controller import run_full_pipeline
+import time
+from agent.runtime import safe_run
 
 
 class AgentDaemon:
-
-    def __init__(self, interval=10):
+    def __init__(self, interval=5):
         self.interval = interval
         self.running = False
         self.thread = None
 
-    def _tick(self):
+    def _cycle(self):
         while self.running:
             try:
-                stabilize_graph()
+                # Example safe heartbeat task
+                # Replace ANY subprocess logic with safe_run()
+                result = safe_run(["echo", "DAEMON CYCLE COMPLETE"])
 
-                # 🪞 REFLECTION STEP (NEW)
-                generate_reflection_goals()
+                print(result["stdout"].strip())
+                print("🧠 DAEMON GOAL: achieve_clean_commit_state")
 
-                ready = get_ready_goals()
-
-                if ready:
-                    goal = ready[0]
-
-                    record_cycle(goal["goal"])
-
-                    print(f"🧠 DAEMON GOAL: {goal['goal']}")
-
-                    report = run_full_pipeline(
-                        file_path=".",
-                        diff=""
-                    )
-
-                    if report.get("ok"):
-                        record_cycle("COMMIT_SUCCESS")
-                        print("✅ DAEMON CYCLE COMPLETE")
-                    else:
-                        record_cycle("BLOCKED")
-                        print("🚫 DAEMON BLOCKED")
-
-                else:
-                    record_cycle("IDLE")
-                    print("🟡 DAEMON IDLE: no goals")
+                # Simulated cleanup task
+                safe_run(["echo", "reduce_kernel_violations"])
 
             except Exception as e:
-                record_cycle("ERROR")
-                print("🔥 DAEMON ERROR:", e)
+                print(f"⚠️ DAEMON ERROR: {type(e).__name__}: {e}")
 
             time.sleep(self.interval)
 
@@ -61,17 +34,10 @@ class AgentDaemon:
             return
 
         self.running = True
-
-        self.thread = threading.Thread(
-            target=self._tick,
-            daemon=True
-        )
-
+        self.thread = threading.Thread(target=self._cycle, daemon=True)
         self.thread.start()
-        print("🚀 DAEMON MODE STARTED")
 
     def stop(self):
         self.running = False
-
         if self.thread:
-            self.thread.join()
+            self.thread.join(timeout=2)

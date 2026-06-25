@@ -5,26 +5,60 @@ KERNEL_PATH = Path("agent_kernel.md")
 
 def load_kernel():
     """
-    Loads the agent kernel file and returns it as a string.
-    This acts as the system-level configuration for the agent.
+    Loads kernel file and returns structured dict.
     """
+
     if not KERNEL_PATH.exists():
-        raise FileNotFoundError("agent_kernel.md not found. Kernel is required to start agent.")
+        raise FileNotFoundError("agent_kernel.md not found")
 
-    with open(KERNEL_PATH, "r", encoding="utf-8") as f:
-        kernel_content = f.read()
+    try:
+        with open(KERNEL_PATH, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
 
-    return kernel_content
+        return {
+            "raw": content,
+            "loaded": True,
+            "path": str(KERNEL_PATH)
+        }
+
+    except Exception as e:
+        return {
+            "raw": "",
+            "loaded": False,
+            "error": str(e)
+        }
+
+
+def get_kernel_raw(kernel):
+    """
+    Safe extractor for kernel raw content.
+    """
+
+    if isinstance(kernel, dict):
+        return kernel.get("raw", "")
+
+    if isinstance(kernel, str):
+        return kernel
+
+    return ""
 
 
 def extract_section(kernel_text: str, section_name: str):
     """
-    Optional helper for later:
-    lets us pull structured parts of the kernel if needed.
+    Simple markdown section extractor.
     """
-    sections = kernel_text.split("##")
-    for section in sections:
-        if section_name.lower() in section.lower():
-            return section.strip()
 
-    return None
+    if not kernel_text:
+        return None
+
+    try:
+        sections = kernel_text.split("##")
+
+        for s in sections:
+            if section_name.lower() in s.lower():
+                return s.strip()
+
+        return None
+
+    except Exception:
+        return None

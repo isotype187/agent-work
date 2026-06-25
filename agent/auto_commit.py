@@ -1,14 +1,12 @@
 import time
 import threading
-import subprocess
-import os
-
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 from agent.ast_kernel_guard import run_ast_kernel_check
 from agent.system_integrity import run_system_check
 from agent.kernel_guard import run_kernel_check
+from agent.executor import run  # 🔥 unified subprocess layer
 
 
 DEBOUNCE_SECONDS = 3.5
@@ -17,45 +15,31 @@ last_event_time = 0
 
 
 # -----------------------------
-# SAFE GIT DIFF
+# SAFE GIT DIFF (FIXED)
 # -----------------------------
 def get_git_diff():
-    try:
-        result = subprocess.run(
-            ["git", "diff"],
-            capture_output=True,
-            text=True
-        )
-        return result.stdout or ""
-    except Exception:
-        return ""
+    result = run(["git", "diff"])
+    return result.get("stdout", "")
 
 
 # -----------------------------
 # COMMIT MESSAGE
 # -----------------------------
 def generate_commit_message(diff: str):
-    diff = diff or ""
-    diff_lower = diff.lower()
+    diff_lower = (diff or "").lower()
 
     tags = []
 
     if "daemon" in diff_lower:
         tags.append("daemon")
-
     if "goal" in diff_lower:
         tags.append("goal")
-
     if "reflection" in diff_lower:
         tags.append("reflection")
-
     if "kernel" in diff_lower:
         tags.append("kernel")
 
-    change_type = "update"
-
-    if "def " in diff_lower:
-        change_type = "refactor"
+    change_type = "refactor" if "def " in diff_lower else "update"
 
     tag_str = ", ".join(tags) if tags else "system"
 
@@ -63,25 +47,19 @@ def generate_commit_message(diff: str):
 
 
 # -----------------------------
-# COMMIT EXECUTION
+# COMMIT EXECUTION (FIXED)
 # -----------------------------
 def git_commit(message):
-    try:
-        subprocess.run(["git", "add", "."], check=True)
+    run(["git", "add", "."])
+    result = run(["git", "commit", "-m", message])
 
-        subprocess.run(
-            ["git", "commit", "-m", message],
-            check=True
-        )
-
-        print(f"✅ Semantic commit: {message}")
-
-    except Exception as e:
-        print("⚠️ Commit failed:", e)
+    print(f"✅ Semantic commit: {message}")
+    if result.get("stderr"):
+        print("ℹ️ git:", result["stderr"])
 
 
 # -----------------------------
-# SAFE COMMIT (STABILIZED)
+# SAFE COMMIT (STABLE)
 # -----------------------------
 def safe_commit():
     diff = get_git_diff()
@@ -89,16 +67,12 @@ def safe_commit():
     if not diff.strip():
         return
 
-    # system check
     report = run_system_check()
-
     if report.get("issues"):
         print("🚫 SYSTEM BLOCK")
         return
 
-    # kernel check
     kernel_report = run_kernel_check()
-
     if not kernel_report.get("ok"):
         print("🚫 KERNEL BLOCK")
         return
@@ -121,7 +95,7 @@ def trigger_commit():
 
 
 # -----------------------------
-# WATCHER (FIXED ANTI-SPAM)
+# WATCHER
 # -----------------------------
 class ChangeHandler(FileSystemEventHandler):
 
@@ -132,8 +106,6 @@ class ChangeHandler(FileSystemEventHandler):
             return
 
         now = time.time()
-
-        # HARD COOLDOWN (prevents watchdog storms)
         if now - last_event_time < 2.0:
             return
 
@@ -141,12 +113,10 @@ class ChangeHandler(FileSystemEventHandler):
 
         print(f"🧠 Change detected: {event.src_path}")
 
-        # AST CHECK (SAFE READ ONLY AFTER FILE SETTLES)
-        time.sleep(0.3)
-
         try:
-            ast_check = run_ast_kernel_check(event.src_path)
+            time.sleep(0.3)
 
+            ast_check = run_ast_kernel_check(event.src_path)
             if not ast_check.get("ok", False):
                 print("🚫 AST BLOCK")
                 return
@@ -166,7 +136,6 @@ def start_auto_commit():
     observer.schedule(ChangeHandler(), path=".", recursive=True)
 
     observer.start()
-
     print("🤖 Auto-commit running (STABLE MODE)")
 
     try:
