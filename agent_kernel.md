@@ -1,183 +1,147 @@
-# 🧠 Agent Kernel File v1.1
+# 🧠 Agent Kernel File v1.2
+
+---
+
+## Generated
+
+Last update:
+2026-06-24 21:35
 
 ---
 
 ## Project Identity
 
-Modular Python-based AI Agent system called "agent-work"
-
-GitHub Repo:
-https://github.com/isotype187/agent-work
+Modular Python AI Agent system.
 
 ---
 
-## 🏗️ Core Architecture
+## Current Architecture
 
-main.py → entry point only (startup + input loop)
+main.py
+→ startup
+→ registry wiring
+→ input loop
 
 agent/
-  core.py → reasoning engine (decides what to do)
-  router.py → selects tool/module
+
+router.py
+→ intent detection
+→ tool routing
+
+llm.py
+→ model communication
+→ memory injection
+
+registry.py
+→ central tool registry
+
+memory.py
+→ persistent sessions
+
+kernel_loader.py
+→ kernel loading
 
 tools/
-  web_utils.py → HTTP/web operations
-  system_utils.py → OS/subprocess operations
-
-memory/
-  memory.py → memory interface logic
-  memory.json → persistent structured memory
-
-config.json → global configuration
 
 ---
 
-## 🧠 Design Principles
+## Current Project Files
 
-- Strict separation of concerns
-- No “god files”
-- Core does NOT execute tools
-- Tools do NOT make decisions
-- Router is the only dispatcher
-- Keep modules small and replaceable
-
----
-
-## 🔁 Execution Flow
-
-Input → Core → Router → Tool → Response → Memory Update
-
----
-
-## ⚙️ Execution Enforcement Rules
-
-- Core MUST call router for every request
-- Router MUST return a single tool or response
-- Tools MUST NOT call other tools directly
-- Memory updates ONLY happen after response generation
-- Any violation = execution rejection or fallback path
-
----
-
-## 🧠 Memory System (Tiered)
-
-### 🟢 Working Memory
-- Temporary session state
-- Not persisted long-term
-
-### 🟡 Long-Term Memory (memory.json)
-Stores ONLY:
-- stable facts
-- preferences
-- system configuration
-- learned behaviors
-
-### 🔵 Summary Memory
-Compressed historical knowledge:
-- replaces raw logs
-- stores condensed insights
-- prevents memory bloat
-
-Example:
-{
-  "summary_2026_06_23": "Refactored agent into modular architecture with core/router/tool separation"
-}
-
----
-
-## 🧠 Memory Rules
-
-- Never store raw conversations
-- Always classify memory writes:
-  - fact
-  - preference
-  - system_state
-  - summary
-  - temporary
-
-- Periodically compress old memory into summaries
+- main.py
+- memory.py
+- __init__.py
+- agent\ast_kernel_guard.py
+- agent\autonomous_loop.py
+- agent\auto_commit.py
+- agent\config.py
+- agent\context_builder.py
+- agent\daemon.py
+- agent\env_boot.py
+- agent\execution_planner.py
+- agent\executor.py
+- agent\goal_engine.py
+- agent\goal_graph.py
+- agent\hardware.py
+- agent\kernel.py
+- agent\kernel_guard.py
+- agent\kernel_loader.py
+- agent\learning_kernel.py
+- agent\llm.py
+- agent\memory.py
+- agent\pipeline_controller.py
+- agent\pipeline_memory.py
+- agent\pipeline_state.py
+- agent\prompt.py
+- agent\realtime_guard.py
+- agent\recursive_planner.py
+- agent\reflection_engine.py
+- agent\registry.py
+- agent\router.py
+- agent\runtime.py
+- agent\self_audit.py
+- agent\self_healer.py
+- agent\self_modulator.py
+- agent\snapshot_builder.py
+- agent\state_controller.py
+- agent\system_integrity.py
+- agent\watchdog_runner.py
+- agent\__init__.py
+- agent\tools\decorator.py
+- agent\tools\file_tools.py
+- agent\tools\git_snapshot.py
+- agent\tools\git_tool.py
+- agent\tools\kernel_info_tool.py
+- agent\tools\kernel_tool.py
+- agent\tools\system_tools.py
+- agent\tools\web_tools.py
+- agent\tools\__init__.py
 
 ---
 
-## 🔌 Tool System
+## Tool Philosophy
 
-- Tools are isolated functions
-- Stateless when possible
-- Registered through a central system
-- NEVER called directly by core
-- All tool access must go through router
-
----
-
-## 🔄 Kernel Loading Contract
-
-When starting any chat or session:
-
-- Kernel must be provided in full
-- Kernel defines system behavior for session
-- If kernel is missing → system runs in degraded mode
-- No assumptions allowed outside kernel scope
+Tools execute.
+Router decides.
+LLM reasons.
+Memory stores state.
 
 ---
 
-## 🔁 Kernel vs Memory Separation
+## Available Command Layer
 
-Kernel = system design + rules + architecture  
-Memory = runtime knowledge + learned state  
+push
+→ git commit and push
 
-Kernel is static unless explicitly changed  
-Memory evolves during execution
+snapshot
+→ project checkpoint
 
----
+kernel
+→ regenerate kernel file
 
-## ⚙️ Git Status
-
-Repository initialized and synced:
-
-Branch: main  
-Remote: origin  
-URL: https://github.com/isotype187/agent-work
+kernel info
+→ copy kernel contents
 
 ---
 
-## 🚀 Development Rules
+## Kernel Rules
 
-- Prefer full-file replacements (drop-ins only)
-- Partial snippets only when explicitly requested
-- Do not merge unrelated responsibilities into one file
-- Maintain strict modular boundaries
-- Keep main.py minimal
-- Treat architecture as stable contract unless explicitly refactoring
-
----
-
-## 🧠 System Goal
-
-Build a scalable agent system that behaves like:
-
-- ChatGPT-style reasoning layer (core)
-- Command router (decision layer)
-- Tool execution system (action layer)
-- Structured memory system (state layer)
-
----
-
-## 🧩 Current Status
-
-- Git initialized ✔
-- GitHub connected ✔
-- Core architecture defined ✔
-- Memory system designed ✔
-- Implementation phase in progress ⏳
-
----
-
-## ⚡ Purpose of This File
-
-This is the single source of truth for:
-
-- architecture rules
+Kernel defines:
+- architecture
+- boundaries
 - system behavior
-- memory design
-- execution flow
-- development constraints
-- system boundaries
+
+Memory defines:
+- runtime knowledge
+- learned state
+
+---
+
+## Development Rules
+
+- Full file replacements preferred
+- Keep modules separated
+- Avoid duplicate logic
+- Use registry for tools
+
+---
+
