@@ -12,6 +12,8 @@ from agent.kernel_loader import load_kernel
 from agent.daemon import AgentDaemon
 from agent.memory import Memory
 from agent.tools.git_snapshot import git_snapshot
+from agent.tools.kernel_tool import kernel_update
+from agent.tools.kernel_info_tool import kernel_info
 
 try:
     from agent.system_integrity import run_system_check
@@ -26,6 +28,8 @@ except Exception:
 registry.register("http_get", http_get)
 registry.register("git_push", git_push)
 registry.register("snapshot", git_snapshot)
+registry.register("kernel_update", kernel_update)
+registry.register("kernel_info", kernel_info)
 
 
 # -----------------------------

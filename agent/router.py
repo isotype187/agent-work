@@ -52,6 +52,13 @@ def select_tool(prompt: str):
     # GITsnapshot TOOL (single command abstraction)
     if any(x in p for x in ["snapshot", "save state", "save project", "backup project"]):
         return "snapshot"
+    
+    # KERNEL TOOL (single-word command)
+    if p == "kernel" or "kernel update" in p or "update kernel" in p:
+        return "kernel_update"
+    
+    if "kernel info" in p or p == "kinfo":
+        return "kernel_info"
 
     # STATUS TOOL
     if p in {"status", "git status"}:
