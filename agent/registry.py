@@ -6,6 +6,10 @@ class ToolRegistry:
         """Register a tool by name with a function."""
         self.tools[name] = func
 
+    def get(self, name, default=None):
+        """Return a registered tool without running it."""
+        return self.tools.get(name, default)
+
     def run(self, name, *args, **kwargs):
         """Run a registered tool by name, passing arguments."""
         if name not in self.tools:

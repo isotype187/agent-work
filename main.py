@@ -1,10 +1,13 @@
 # main.py
 
+from agent.console import configure_console_encoding
 from agent.router import route_request
 from agent.tools.web_tools import http_get
 from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
+
+configure_console_encoding()
 
 # OPTIONAL: system integrity layer (safe import)
 try:

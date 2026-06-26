@@ -1,7 +1,8 @@
 # agent/kernel_guard.py
 
 import os
-import subprocess
+
+from agent.runtime import safe_run
 
 KERNEL_PATH = "agent_kernel.md"
 
@@ -16,12 +17,12 @@ def load_kernel():
 
 def get_git_diff():
     try:
-        result = subprocess.run(
+        result = safe_run(
             ["git", "diff"],
             capture_output=True,
             text=True
         )
-        return result.stdout or ""
+        return result["stdout"] or ""
     except Exception:
         return ""
 

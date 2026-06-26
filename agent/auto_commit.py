@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import subprocess
 from threading import Timer
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -15,7 +14,11 @@ sys.path.insert(
 )
 
 from agent.ast_kernel_guard import run_ast_kernel_check
+from agent.console import configure_console_encoding
 from agent.pipeline_controller import run_full_pipeline
+from agent.runtime import safe_run
+
+configure_console_encoding()
 
 
 DEBOUNCE_SECONDS = 2.5
@@ -24,20 +27,20 @@ timer = None
 
 def get_git_diff():
     try:
-        result = subprocess.run(
+        result = safe_run(
             ["git", "diff", "--cached"],
             capture_output=True,
             text=True
         )
 
-        if not result.stdout.strip():
-            result = subprocess.run(
+        if not result["stdout"].strip():
+            result = safe_run(
                 ["git", "diff"],
                 capture_output=True,
                 text=True
             )
 
-        return result.stdout
+        return result["stdout"]
     except Exception:
         return ""
 
@@ -78,10 +81,10 @@ def generate_commit_message(diff: str):
 
 def git_commit(message):
     try:
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", message], check=True)
+        safe_run(["git", "add", "."], check=True)
+        safe_run(["git", "commit", "-m", message], check=True)
         print(f"✅ Semantic commit: {message}")
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         print("⚠️ Commit failed:", e)
 
 
