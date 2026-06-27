@@ -1,4 +1,4 @@
-from registry import registry
+from agent.registry import registry
 
 def write_file(path, content):
     with open(path, "w", encoding="utf-8") as f:
