@@ -1,17 +1,33 @@
 import time
 import threading
+import json
+from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 from agent.ast_kernel_guard import run_ast_kernel_check
 from agent.system_integrity import run_system_check
 from agent.kernel_guard import run_kernel_check
+from agent.kernel_loader import load_kernel
 from agent.executor import run  # 🔥 unified subprocess layer
 
 
+CONFIG_PATH = Path("config.json")
 DEBOUNCE_SECONDS = 3.5
 timer = None
 last_event_time = 0
+
+
+# -----------------------------
+# CONFIG GATE
+# -----------------------------
+def auto_commit_enabled():
+    try:
+        config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+
+    return bool(config.get("auto_commit", {}).get("enabled", False))
 
 
 # -----------------------------
@@ -62,12 +78,16 @@ def git_commit(message):
 # SAFE COMMIT (STABLE)
 # -----------------------------
 def safe_commit():
+    if not auto_commit_enabled():
+        print("AUTO-COMMIT BLOCK: disabled in config.json")
+        return
+
     diff = get_git_diff()
 
     if not diff.strip():
         return
 
-    report = run_system_check()
+    report = run_system_check(load_kernel())
     if report.get("issues"):
         print("🚫 SYSTEM BLOCK")
         return
@@ -132,6 +152,10 @@ class ChangeHandler(FileSystemEventHandler):
 # START WATCHER
 # -----------------------------
 def start_auto_commit():
+    if not auto_commit_enabled():
+        print("Auto-commit disabled. Set config.auto_commit.enabled=true to enable.")
+        return
+
     observer = Observer()
     observer.schedule(ChangeHandler(), path=".", recursive=True)
 

@@ -1,7 +1,6 @@
 # agent/kernel_guard.py
 
-import os
-import subprocess
+from agent.executor import run
 
 KERNEL_PATH = "agent_kernel.md"
 
@@ -15,15 +14,8 @@ def load_kernel():
 
 
 def get_git_diff():
-    try:
-        result = subprocess.run(
-            ["git", "diff"],
-            capture_output=True,
-            text=True
-        )
-        return result.stdout or ""
-    except Exception:
-        return ""
+    result = run(["git", "diff"])
+    return result.get("stdout", "")
 
 
 def kernel_violation_check(diff: str, kernel: str):

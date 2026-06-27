@@ -5,7 +5,7 @@ load_project_root()
 
 from agent.router import route_request
 from agent.tools.web_tools import http_get
-from agent.tools.git_tool import git_push
+from agent.tools.git_tool import git_push, git_status
 from agent.registry import registry
 from agent.config import load_config
 from agent.kernel_loader import load_kernel
@@ -27,6 +27,7 @@ except Exception:
 # -----------------------------
 registry.register("http_get", http_get)
 registry.register("git_push", git_push)
+registry.register("git_status", git_status)
 registry.register("snapshot", git_snapshot)
 registry.register("kernel_update", kernel_update)
 registry.register("kernel_info", kernel_info)

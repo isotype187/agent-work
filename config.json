@@ -1,5 +1,8 @@
 {
   "mode": "auto",
+  "auto_commit": {
+    "enabled": false
+  },
   "profiles": {
     "laptop": {
       "model": "phi3",

@@ -1,8 +1,8 @@
 # agent/tools/kernel_tool.py
 
 from pathlib import Path
-import subprocess
 from datetime import datetime
+from agent.executor import run as executor_run
 
 KERNEL_PATH = Path("agent_kernel.md")
 
@@ -11,17 +11,8 @@ KERNEL_PATH = Path("agent_kernel.md")
 # SAFE COMMAND RUNNER
 # -----------------------------
 def run(cmd):
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace"
-        )
-        return result.stdout + result.stderr
-    except Exception as e:
-        return f"ERROR: {type(e).__name__}: {e}"
+    result = executor_run(cmd)
+    return (result.get("stdout") or "") + (result.get("stderr") or "")
 
 
 # -----------------------------

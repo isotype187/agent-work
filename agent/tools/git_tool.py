@@ -1,23 +1,13 @@
-import subprocess
 from datetime import datetime
+from agent.executor import run as executor_run
 
 
 # -----------------------------
 # SAFE RUNNER
 # -----------------------------
 def run(cmd):
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            shell=isinstance(cmd, str)
-        )
-        return result.stdout + result.stderr
-    except Exception as e:
-        return f"ERROR: {type(e).__name__}: {e}"
+    result = executor_run(cmd)
+    return (result.get("stdout") or "") + (result.get("stderr") or "")
 
 
 # -----------------------------
@@ -48,6 +38,16 @@ def build_commit_message(diff: str):
 # -----------------------------
 def get_diff():
     return run(["git", "diff"])
+
+
+# -----------------------------
+# STATUS
+# -----------------------------
+def git_status(prompt: str = ""):
+    return {
+        "status": "success",
+        "output": run(["git", "status", "--short"])
+    }
 
 
 # -----------------------------
