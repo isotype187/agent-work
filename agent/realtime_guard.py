@@ -1,6 +1,13 @@
 import os
 import time
 
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    "venv",
+}
+
 BLOCKED_PATTERNS = [
     ("core.py", "router.py"),  # bad coupling
     ("tools/", "core"),        # inverted dependency
@@ -35,8 +42,30 @@ def detect_structure_violations(changed_file):
     return issues
 
 
+def iter_python_files(path):
+    if os.path.isfile(path):
+        if path.endswith(".py"):
+            yield path
+        return
+
+    if not os.path.isdir(path):
+        return
+
+    for root, dirs, files in os.walk(path):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+
+        for filename in files:
+            if filename.endswith(".py"):
+                yield os.path.join(root, filename)
+
+
 def run_realtime_check(file_path):
+    issues = []
+
+    for python_file in iter_python_files(file_path):
+        issues.extend(detect_structure_violations(python_file))
+
     return {
-        "ok": True if not detect_structure_violations(file_path) else False,
-        "issues": detect_structure_violations(file_path)
+        "ok": len(issues) == 0,
+        "issues": issues
     }

@@ -1,6 +1,13 @@
 import ast
 import os
 
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    "venv",
+}
+
 
 def load_file(path):
     try:
@@ -46,12 +53,29 @@ def extract_function_calls(tree):
     return calls
 
 
-def run_ast_kernel_check(file_path):
+def iter_python_files(path):
+    if os.path.isfile(path):
+        if path.endswith(".py"):
+            yield path
+        return
+
+    if not os.path.isdir(path):
+        return
+
+    for root, dirs, files in os.walk(path):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+
+        for filename in files:
+            if filename.endswith(".py"):
+                yield os.path.join(root, filename)
+
+
+def check_python_file(file_path):
     content = load_file(file_path)
     tree = analyze_ast(content)
 
     if not tree:
-        return {"ok": False, "issues": ["Invalid Python AST"]}
+        return [f"{file_path}: Invalid Python AST"]
 
     imports = extract_imports(tree)
     calls = extract_function_calls(tree)
@@ -61,23 +85,34 @@ def run_ast_kernel_check(file_path):
     # -----------------------------
     # RULE 1: core must not call router directly
     # -----------------------------
-    if file_path.endswith("core.py"):
+    normalized_path = file_path.replace("\\", "/")
+
+    if normalized_path.endswith("core.py"):
         if "router" in imports or "router" in calls:
-            issues.append("Core layer directly referencing router (architecture violation)")
+            issues.append(f"{file_path}: Core layer directly referencing router (architecture violation)")
 
     # -----------------------------
     # RULE 2: tools must be isolated
     # -----------------------------
-    if "tools" in file_path:
+    if "/tools/" in normalized_path:
         if "router" in imports:
-            issues.append("Tool importing router (violates isolation rule)")
+            issues.append(f"{file_path}: Tool importing router (violates isolation rule)")
 
     # -----------------------------
     # RULE 3: router must not execute tools directly
     # -----------------------------
-    if file_path.endswith("router.py"):
+    if normalized_path.endswith("router.py"):
         if "subprocess" in imports:
-            issues.append("Router using subprocess directly (bypasses tool layer)")
+            issues.append(f"{file_path}: Router using subprocess directly (bypasses tool layer)")
+
+    return issues
+
+
+def run_ast_kernel_check(file_path):
+    issues = []
+
+    for python_file in iter_python_files(file_path):
+        issues.extend(check_python_file(python_file))
 
     return {
         "ok": len(issues) == 0,

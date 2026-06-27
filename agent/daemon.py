@@ -1,7 +1,9 @@
 # agent/daemon.py
 
+import sys
 import threading
 import time
+
 from agent.runtime import safe_run
 
 
@@ -14,18 +16,15 @@ class AgentDaemon:
     def _cycle(self):
         while self.running:
             try:
-                # Example safe heartbeat task
-                # Replace ANY subprocess logic with safe_run()
-                result = safe_run(["echo", "DAEMON CYCLE COMPLETE"])
+                result = safe_run([sys.executable, "-c", "print('DAEMON CYCLE COMPLETE')"])
 
                 print(result["stdout"].strip())
-                print("🧠 DAEMON GOAL: achieve_clean_commit_state")
+                print("DAEMON GOAL: achieve_clean_commit_state")
 
-                # Simulated cleanup task
-                safe_run(["echo", "reduce_kernel_violations"])
+                safe_run([sys.executable, "-c", "print('reduce_kernel_violations')"])
 
             except Exception as e:
-                print(f"⚠️ DAEMON ERROR: {type(e).__name__}: {e}")
+                print(f"DAEMON ERROR: {type(e).__name__}: {e}")
 
             time.sleep(self.interval)
 

@@ -3,3 +3,6 @@ venv/
 *.pyc
 .DS_Store
 agent_memory.json
+memory/kernel_learning.json
+memory/pipeline_evolution.json
+memory/pipeline_state.json

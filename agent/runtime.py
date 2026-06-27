@@ -1,16 +1,14 @@
 import os
+
 from agent.executor import run
+
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 
-# -----------------------------
-# SAFE EXECUTION (NO STREAM THREADS)
-# -----------------------------
-def safe_run(cmd):
+def safe_run(cmd, **kwargs):
     """
-    Fully safe subprocess execution.
-    NEVER triggers _readerthread crashes.
+    Compatibility wrapper around the unified executor.
+    Extra subprocess-style kwargs are accepted for older call sites.
     """
-
     return run(cmd)

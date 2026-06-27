@@ -11,14 +11,11 @@ class ToolRegistry:
     def __init__(self):
         self.tools = {}
 
-    # -----------------------------
-    # CORE API
-    # -----------------------------
     def register(self, name: str, fn):
         self.tools[name] = fn
 
-    def get(self, name: str):
-        return self.tools.get(name)
+    def get(self, name: str, default=None):
+        return self.tools.get(name, default)
 
     def has(self, name: str):
         return name in self.tools
@@ -26,15 +23,16 @@ class ToolRegistry:
     def all(self):
         return dict(self.tools)
 
-    # -----------------------------
-    # AUTO PLUGIN LOADER
-    # -----------------------------
+    def run(self, name, *args, **kwargs):
+        if name not in self.tools:
+            raise Exception(f"Tool not found: {name}")
+        return self.tools[name](*args, **kwargs)
+
     def load_plugins(self, package: str = "agent.tools"):
         """
         Auto-imports modules inside agent/tools/
         and registers @tool-decorated functions.
         """
-
         pkg = importlib.import_module(package)
 
         for _, module_name, _ in pkgutil.iter_modules(pkg.__path__):
@@ -48,7 +46,4 @@ class ToolRegistry:
                     self.register(tool_name, obj)
 
 
-# -----------------------------
-# SINGLE GLOBAL REGISTRY
-# -----------------------------
 registry = ToolRegistry()

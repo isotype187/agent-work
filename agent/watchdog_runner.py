@@ -1,8 +1,9 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from snapshot_builder import build_snapshot
 import time
 from threading import Timer
+
+from agent.snapshot_builder import build_snapshot
 
 DEBOUNCE_TIME = 2.0  # seconds
 timer = None
