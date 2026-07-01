@@ -8,5 +8,6 @@
         ]
     }
 },
-"terminal.integrated.defaultProfile.windows": "myPythonEnv"
+"terminal.integrated.defaultProfile.windows": "myPythonEnv",
+"editor.mouseWheelZoom": true
 }

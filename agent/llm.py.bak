@@ -1,14 +1,10 @@
-﻿# agent/llm.py
-
-import requests
+﻿import requests
 import time
 
 DEBUG = False
 
+OLLAMA_URL = "http://localhost:11434"
 
-# -----------------------------
-# INSTANT RESPONSES
-# -----------------------------
 INSTANT_RULES = {
     "hello": "Hey 👋",
     "hi": "Hey 👋",
@@ -17,27 +13,18 @@ INSTANT_RULES = {
     "status": "Agent running",
 }
 
-
 def is_simple(prompt: str) -> bool:
     if not prompt:
         return True
-
     p = prompt.strip().lower()
-
     return p in INSTANT_RULES or len(p) <= 5
-
 
 def instant_response(prompt: str) -> str:
     return INSTANT_RULES.get(prompt.strip().lower(), "⚡ Instant response")
 
-
-# -----------------------------
-# MEMORY BUILDER
-# -----------------------------
 def build_prompt(prompt: str, memory_context: str | None):
     if not memory_context:
         return prompt
-
     return f"""[MEMORY CONTEXT]
 {memory_context}
 
@@ -45,27 +32,26 @@ def build_prompt(prompt: str, memory_context: str | None):
 {prompt}
 """
 
+def resolve_model(profile: dict) -> str:
+    model = profile.get("model", "llama3.2:3b")
+    legacy_map = {
+        "phi3": "phi3",
+        "mistral": "mistral",
+        "llama3": "llama3.1:8b",
+    }
+    return legacy_map.get(model, model)
 
-# -----------------------------
-# MAIN LLM ENTRY
-# -----------------------------
 def ask_llm(prompt: str, profile: dict, memory=None, session_id="default"):
     try:
-        # instant bypass
         if is_simple(prompt):
             resp = instant_response(prompt)
-
             if memory:
                 memory.add(session_id, "assistant", resp)
-
             return resp
 
-        model = profile.get("model", "phi3")
+        model = resolve_model(profile)
         keep_alive = profile.get("keep_alive", "2m")
 
-        # -------------------------
-        # MEMORY READ
-        # -------------------------
         memory_context = None
         if memory:
             try:
@@ -76,13 +62,8 @@ def ask_llm(prompt: str, profile: dict, memory=None, session_id="default"):
 
         final_prompt = build_prompt(prompt, memory_context)
 
-        # -------------------------
-        # OLLAMA CALL
-        # -------------------------
-        start = time.time()
-
-        response = requests.post(
-            "http://localhost:11434/api/generate",
+        r = requests.post(
+            f"{OLLAMA_URL}/api/generate",
             json={
                 "model": model,
                 "prompt": final_prompt,
@@ -92,12 +73,10 @@ def ask_llm(prompt: str, profile: dict, memory=None, session_id="default"):
             timeout=180
         )
 
-        data = response.json()
-        output = data.get("response", "[ERROR] No response")
+        r.raise_for_status()
+        data = r.json()
 
-        if DEBUG:
-            print(f"🧠 MODEL: {model}")
-            print(f"⏱ TIME: {time.time() - start:.2f}s")
+        output = data.get("response", "[ERROR] No response")
 
         if memory:
             memory.add(session_id, "assistant", output)
